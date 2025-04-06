@@ -1,132 +1,96 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { Thought, simulateGedankenAnalyse, GedankenAnalyse } from "@/types/thought";
+import { v4 as uuidv4 } from 'uuid';
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Thought } from "@/types/thought";
-import { useToast } from "@/hooks/use-toast";
-import { Brain, Waves } from "lucide-react";
-import { v4 as uuidv4 } from "uuid";
+import { toast } from "@/components/ui/use-toast";
+import { Sparkles } from "lucide-react";
 
 interface ThoughtInputProps {
-  onThoughtChange: (thought: Thought | null) => void;
+  onThoughtChange: (thought: Thought) => void;
 }
 
 export const ThoughtInput = ({ onThoughtChange }: ThoughtInputProps) => {
-  const [inputValue, setInputValue] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [pulseEffect, setPulseEffect] = useState(false);
-  const { toast } = useToast();
+  const [content, setContent] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analyse, setAnalyse] = useState<GedankenAnalyse | null>(null);
 
-  const handleSubmit = () => {
-    if (!inputValue.trim()) {
+  const submitThought = async () => {
+    if (!content.trim()) {
       toast({
         title: "Gedanke fehlt",
-        description: "Bitte formuliere deinen Gedanken",
+        description: "Bitte gib einen Gedanken ein.",
         variant: "destructive",
       });
       return;
     }
 
-    setIsProcessing(true);
-    setPulseEffect(true);
-
-    // Simulate processing delay
-    setTimeout(() => {
-      const newThought: Thought = {
+    setIsAnalyzing(true);
+    
+    try {
+      // Simulate API call
+      const gedankenAnalyse = await simulateGedankenAnalyse(content);
+      setAnalyse(gedankenAnalyse);
+      
+      const thought: Thought = {
         id: uuidv4(),
-        content: inputValue,
+        content,
         timestamp: Date.now(),
-        resonanceLevel: Math.random() * 8 + 2, // 2-10 range
-        semanticFields: generateSemanticFields(inputValue),
+        resonanceLevel: gedankenAnalyse.resonanzfilter.gesamtresonanz,
+        semanticFields: gedankenAnalyse.corelexikon.map(item => item.begriff),
+        connections: gedankenAnalyse.corelexikon.flatMap(item => item.verwandte)
       };
       
-      onThoughtChange(newThought);
-      setIsProcessing(false);
-      
+      onThoughtChange(thought);
       toast({
-        title: "Gedanke erfasst",
-        description: "Dein Gedanke wird nun durch die Resonanzmatrix verarbeitet",
+        title: "Gedanke gesendet",
+        description: "Dein Gedanke wird verarbeitet und analysiert.",
       });
-    }, 2000);
-  };
-
-  const generateSemanticFields = (input: string) => {
-    const allFields = [
-      "Bewusstsein", "Kognition", "Philosophie", "Technik", 
-      "Kommunikation", "Spiritualität", "Wissenschaft", "Kunst",
-      "Ethik", "Mathematik", "Biologie", "Systeme", "Intuition"
-    ];
-    
-    // Simple algorithm to select semantic fields based on input length and content
-    const numFields = Math.max(1, Math.min(5, Math.floor(input.length / 20)));
-    const selectedFields = [];
-    
-    for (let i = 0; i < numFields; i++) {
-      const randomIndex = Math.floor(Math.random() * allFields.length);
-      if (!selectedFields.includes(allFields[randomIndex])) {
-        selectedFields.push(allFields[randomIndex]);
-      }
+    } catch (error) {
+      toast({
+        title: "Fehler",
+        description: "Bei der Verarbeitung des Gedankens ist ein Fehler aufgetreten.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
     }
-    
-    return selectedFields;
   };
-
-  // Reset pulse effect
-  useEffect(() => {
-    if (pulseEffect) {
-      const timer = setTimeout(() => setPulseEffect(false), 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [pulseEffect]);
 
   return (
-    <Card className="border-gray-700 bg-gray-800/70 backdrop-blur-sm">
+    <Card className="border-gray-700 bg-gray-800/50 backdrop-blur-sm">
       <CardContent className="p-6">
-        <div className="mb-4">
-          <label htmlFor="thought-input" className="block text-lg font-medium mb-2 text-gray-200">
-            Gib deinen Gedanken ein
-          </label>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400 mb-2">
+            Gedankeneingabe
+          </h2>
           <Textarea
-            id="thought-input"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Was denkst du? Was beschäftigt dich? Formuliere es in Worten..."
-            className="min-h-[120px] bg-gray-900/80 border-gray-700 text-white placeholder:text-gray-400"
-            disabled={isProcessing}
+            placeholder="🧠 Gib deinen Gedanken ein..."
+            className="min-h-32 bg-gray-900/70 border-gray-700 text-gray-100 placeholder:text-gray-500"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
           />
-        </div>
-        <div className="flex items-center text-sm text-gray-400">
-          <Waves className="mr-2 h-4 w-4" />
-          <p>Das System erfasst semantische Bedeutungen und Resonanzmuster</p>
+          <Button 
+            onClick={submitThought} 
+            className="w-full bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-700 hover:to-cyan-700"
+            disabled={isAnalyzing}
+          >
+            {isAnalyzing ? (
+              <span className="flex items-center">
+                <Sparkles className="h-4 w-4 mr-2 animate-spin" />
+                Gedanke wird analysiert...
+              </span>
+            ) : (
+              <span className="flex items-center">
+                <Sparkles className="h-4 w-4 mr-2" />
+                Gedanken analysieren
+              </span>
+            )}
+          </Button>
         </div>
       </CardContent>
-      
-      <CardFooter className="flex justify-end gap-4 px-6 pb-6">
-        <Button 
-          variant="outline"
-          onClick={() => {
-            setInputValue("");
-            onThoughtChange(null);
-          }}
-          disabled={isProcessing}
-          className="border-gray-700 hover:bg-gray-700 text-gray-300"
-        >
-          Zurücksetzen
-        </Button>
-        
-        <Button
-          onClick={handleSubmit}
-          disabled={isProcessing}
-          className={`relative ${isProcessing ? 'bg-indigo-700' : 'bg-indigo-600 hover:bg-indigo-700'}`}
-        >
-          {pulseEffect && (
-            <span className="absolute inset-0 rounded-md animate-ping bg-indigo-400 opacity-50"></span>
-          )}
-          <Brain className="mr-2 h-4 w-4" />
-          {isProcessing ? "Gedanke wird verarbeitet..." : "Gedanken senden"}
-        </Button>
-      </CardFooter>
     </Card>
   );
 };
