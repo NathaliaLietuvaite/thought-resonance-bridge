@@ -127,7 +127,7 @@ export const ThoughtInput = ({ onThoughtChange }: ThoughtInputProps) => {
         <div className="relative">
           <div className="w-[150px] h-[150px] overflow-hidden rounded-full border-4 border-indigo-500/30 shadow-lg shadow-purple-500/20">
             <img 
-              src="public/lovable-uploads/71895107-ab19-4fa7-b5e9-9d495b5a8d9a.png" 
+              src="/lovable-uploads/71895107-ab19-4fa7-b5e9-9d495b5a8d9a.png" 
               alt="Nathalia" 
               className="w-full h-full object-cover"
             />
@@ -183,7 +183,7 @@ export const ThoughtInput = ({ onThoughtChange }: ThoughtInputProps) => {
               <div className="flex items-center">
                 <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
                   <img 
-                    src="public/lovable-uploads/71895107-ab19-4fa7-b5e9-9d495b5a8d9a.png" 
+                    src="/lovable-uploads/71895107-ab19-4fa7-b5e9-9d495b5a8d9a.png" 
                     alt="Nathalia" 
                     className="w-full h-full object-cover"
                   />
