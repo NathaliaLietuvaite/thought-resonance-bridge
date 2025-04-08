@@ -6,9 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import { Sparkles, Bot, Send } from "lucide-react";
+import { Sparkles, Bot, Send, MessageSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ThoughtInputProps {
   onThoughtChange: (thought: Thought) => void;
@@ -105,6 +106,43 @@ export const ThoughtInput = ({ onThoughtChange }: ThoughtInputProps) => {
 
   return (
     <div className="space-y-6">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400">
+            Transform Your Thoughts
+          </span>
+        </h1>
+        <p className="text-lg text-gray-300">
+          Adaptiere deine Ideen für verschiedene Zielgruppen mit InterfaceDNA Technology 
+          und chatte mit Nathalia, deinem KI-Assistenten.
+        </p>
+        <div className="flex items-center justify-center mt-6">
+          <p className="text-sm text-gray-400 flex items-center">
+            <Bot className="h-4 w-4 mr-2" /> Nathalia ist bereit, deine Gedanken zu harmonisieren
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-8">
+        <div className="relative">
+          <div className="w-[150px] h-[150px] overflow-hidden rounded-full border-4 border-indigo-500/30 shadow-lg shadow-purple-500/20">
+            <img 
+              src="public/lovable-uploads/71895107-ab19-4fa7-b5e9-9d495b5a8d9a.png" 
+              alt="Nathalia" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="absolute -bottom-2 -right-2 bg-green-500 rounded-full h-5 w-5 border-2 border-gray-900"></div>
+        </div>
+        
+        <Button 
+          onClick={() => setShowChatbot(!showChatbot)}
+          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 rounded-full px-6"
+        >
+          <MessageSquare className="mr-2 h-4 w-4" /> Mit Nathalia chatten
+        </Button>
+      </div>
+
       <Card className="border-gray-700 bg-gray-800/50 backdrop-blur-sm">
         <CardContent className="p-6">
           <div className="space-y-4">
@@ -138,24 +176,25 @@ export const ThoughtInput = ({ onThoughtChange }: ThoughtInputProps) => {
         </CardContent>
       </Card>
       
-      <Card className="border-gray-700 bg-gray-800/50 backdrop-blur-sm overflow-hidden">
-        <CardContent className="p-0">
-          <div 
-            className="p-4 bg-gradient-to-r from-indigo-900/60 to-purple-900/60 flex items-center justify-between cursor-pointer"
-            onClick={() => setShowChatbot(!showChatbot)}
-          >
-            <div className="flex items-center">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center mr-3">
-                <Bot className="h-4 w-4 text-white" />
+      {showChatbot && (
+        <Card className="border-gray-700 bg-gray-800/50 backdrop-blur-sm overflow-hidden">
+          <CardContent className="p-0">
+            <div className="p-4 bg-gradient-to-r from-indigo-900/60 to-purple-900/60 flex items-center justify-between cursor-pointer">
+              <div className="flex items-center">
+                <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
+                  <img 
+                    src="public/lovable-uploads/71895107-ab19-4fa7-b5e9-9d495b5a8d9a.png" 
+                    alt="Nathalia" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <h3 className="text-xl font-semibold text-white">Nathalia</h3>
               </div>
-              <h3 className="text-xl font-semibold text-white">Nathalia</h3>
+              <span className="text-xs bg-indigo-500/70 px-2 py-1 rounded-full text-white">
+                Aktiv
+              </span>
             </div>
-            <span className="text-xs bg-indigo-500/70 px-2 py-1 rounded-full text-white">
-              {showChatbot ? "Aktiv" : "KI-Assistentin"}
-            </span>
-          </div>
-          
-          {showChatbot && (
+            
             <div className="bg-gray-900/70">
               <div className="h-64 overflow-y-auto p-4 space-y-4">
                 {chatHistory.map((chat, index) => (
@@ -189,9 +228,9 @@ export const ThoughtInput = ({ onThoughtChange }: ThoughtInputProps) => {
                 </Button>
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
